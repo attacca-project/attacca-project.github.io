@@ -1,0 +1,70 @@
+/* compare.css: comparison section (Molmo failures, ROCKET-2 | Ours pairs). Builds on attacca.css
+   (.results-section, .section-caption, .video-toggle). */
+
+.cmp-block + .cmp-block { margin-top: 2.75rem; }
+
+/* two videos per block, side by side; one column on phones */
+.cmp-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: end;
+}
+.cmp-item { margin: 0; min-width: 0; }
+
+.cmp-task {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text-primary);
+}
+/* model labels: one per half of a pair composite (or one for a single video) */
+.cmp-labels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.cmp-labels.is-single { grid-template-columns: minmax(0, 1fr); }
+.cmp-labels .is-ours { color: var(--text-primary); }
+
+.cmp-video-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  background: #0b0f17;
+  box-shadow: var(--shadow-lg);
+  aspect-ratio: 16 / 9;
+}
+.cmp-video-wrap.is-pair { aspect-ratio: 32 / 9; }
+.cmp-video-wrap video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* thin divider between the two halves of a pair */
+.cmp-video-wrap.is-pair::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+  pointer-events: none;
+}
+
+@media screen and (max-width: 768px) {
+  .cmp-row { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; }
+  .cmp-block + .cmp-block { margin-top: 2.25rem; }
+  .cmp-task { font-size: 0.9rem; }
+  .cmp-labels { font-size: 0.8rem; }
+}

@@ -1,10 +1,566 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Attacca</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attacca: Goal-Directed Control under State Continuity</title>
+  <meta name="description" content="Attacca is a goal-conditioned Minecraft policy that keeps working across task hand-offs. It searches for, approaches and interacts with each next target from the state the previous task left behind.">
+  <meta name="author" content="Gyusik Seo, Jaehong Yoon">
+  <meta name="keywords" content="embodied agents, goal-conditioned control, long-horizon, Minecraft, skill hand-off, state continuity">
+  <link rel="canonical" href="https://attacca-project.github.io/">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://attacca-project.github.io/">
+  <meta property="og:title" content="Attacca: Goal-Directed Control under State Continuity for Long-Horizon Embodied Agents">
+  <meta property="og:description" content="Attacca is a goal-conditioned Minecraft policy that keeps working across task hand-offs. It searches for, approaches and interacts with each next target from the state the previous task left behind.">
+  <meta property="og:image" content="https://attacca-project.github.io/static/images/social_preview.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Attacca: Goal-Directed Control under State Continuity for Long-Horizon Embodied Agents">
+  <meta name="twitter:description" content="Attacca is a goal-conditioned Minecraft policy that keeps working across task hand-offs. It searches for, approaches and interacts with each next target from the state the previous task left behind.">
+  <meta name="twitter:image" content="https://attacca-project.github.io/static/images/social_preview.jpg">
+  <meta name="citation_title" content="Attacca: Goal-Directed Control under State Continuity for Long-Horizon Embodied Agents">
+  <meta name="citation_author" content="Seo, Gyusik">
+  <meta name="citation_author" content="Yoon, Jaehong">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+  <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/attacca.css">
+  <link rel="stylesheet" href="static/css/stage-carousel.css">
+  <link rel="stylesheet" href="static/css/compare.css">
+  <script defer src="static/js/stage-carousel.js"></script>
+  <script defer src="static/js/site.js"></script>
 </head>
 <body>
-  <h1>Attacca</h1>
-  <p>Goal-Directed Control under State Continuity</p>
+
+<header class="topbar" id="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#top">Attacca</a>
+    <nav class="toc" aria-label="Sections">
+      <a href="#overview">Overview</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#analysis">Analysis</a>
+      <a href="#abstract">Abstract</a>
+      <a href="#bibtex">BibTeX</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============================================================ HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <h1 class="title">
+        <span class="wordmark">Attacca</span>
+        <span class="subtitle">Goal-Directed Control under State Continuity<br>for Long-Horizon Embodied Agents</span>
+      </h1>
+      <ul class="authors">
+        <li>Gyusik Seo<sup>1</sup></li>
+        <li>Jaehong Yoon<sup>1</sup></li>
+      </ul>
+      <ul class="affils">
+        <li><sup>1</sup>Nanyang Technological University</li>
+      </ul>
+      <div class="links">
+        <span class="btn is-disabled" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 2v6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>arXiv<span class="soon">soon</span></span>
+        <a class="btn" href="https://github.com/attacca-project/attacca"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Code</a>
+        <a class="btn is-ghost" href="#bibtex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h4v4c0 3-1.5 5-4 6M15 7h4v4c0 3-1.5 5-4 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>BibTeX</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero-media">
+    <div class="wrap">
+      <div class="video-frame">
+        <video id="grid-video" autoplay muted loop playsinline preload="auto"
+                 poster="static/videos/montage_short_horizon_rows_poster.jpg" width="1920" height="810"
+                 aria-label="Short-horizon episodes played side by side: Mine (top row), Hunt (middle row) and Place (bottom row), each conditioned on a goal image">
+            <source src="static/videos/montage_short_horizon_rows.mp4" type="video/mp4">
+          </video>
+        <button class="video-toggle" type="button" data-target="grid-video" aria-label="Pause" title="Pause"><svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg><svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg></button>
+      </div>
+      <p class="media-note hero-caption">Given a goal image of any world, Attacca finds, approaches, and interacts with the masked target in the goal image.<br>The heat map is the predicted target mask in the current observation.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ OVERVIEW -->
+  <section class="section is-alt" id="overview">
+    <div class="wrap narrow">
+      <div class="tldr">
+        <p class="tldr-label">TL;DR</p>
+        <ul>
+          <li><b>Attacca</b> is a goal-conditioned policy for Minecraft that keeps working when one task ends and the next begins. From whatever state the previous task left, it <b>searches for</b> the next target, <b>approaches</b> it and <b>interacts</b> with it.</li>
+          <li>It is trained with <b>goal images from other worlds</b>, a <b>mask head</b> that predicts where the target is in view, and a <b>phase head</b> that tells the policy whether to search, approach or interact.</li>
+          <li>It reaches <b>39.0&ndash;47.5% clean success</b> on short tasks, 1.7&ndash;2.4&times; the strongest baseline, and completes <b>54%, 30% and 28%</b> of three long chains, up to <b>7&times;</b> the strongest baseline.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wrap sub">
+      <div class="section-head">
+        <p class="eyebrow">The problem</p>
+        <h2>A good plan still has to be carried out</h2>
+        <p class="lead">A planner can name the next subgoal, but the low-level policy still has to start it from wherever the last one ended. We call this the <em>skill hand-off gap</em>.</p>
+      </div>
+      <figure class="figure">
+        <img src="static/images/paper/teaser.jpg" width="2000" height="1015" loading="lazy" decoding="async" alt="An agent mines an oak log, then three diamond ores, then opens a crafting table in one continuous episode. Each task starts where the previous one ended, and for every new target the agent goes through search, approach, interact and finished.">
+        <figcaption class="wide-caption"><b>Goal-directed embodied control.</b> The agent executes tasks sequentially, with each task starting from the state left by the previous one.<br>If the target is initially out of view, the agent must search for it, approach it once found, and interact with it to achieve the task.</figcaption>
+      </figure>
+      <ol class="cards">
+        <li class="card">
+          <span class="card-tag">1</span>
+          <h3>Each task inherits the previous task's end state</h3>
+          <p>After a task ends, the agent may face the wrong way, the world may have changed, and the next target may be out of view. The policy has to find it before it can do anything with it.</p>
+        </li>
+        <li class="card">
+          <span class="card-tag">2</span>
+          <h3>Current policies are tested on short tasks</h3>
+          <p>Visual goal-conditioned policies such as ROCKET-2, STEVE-1 and GROOT are mostly built and evaluated on short tasks where the view changes little, often with the target already in sight.</p>
+        </li>
+        <li class="card">
+          <span class="card-tag">3</span>
+          <h3>Attacca learns the whole progression</h3>
+          <p>We train one policy on demonstrations that go from searching to approaching to interacting, with goal images that never come from the world the agent is acting in.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================ METHOD -->
+  <section class="section" id="method">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Method</p>
+        <h2>How Attacca carries a task across the hand-off</h2>
+        <p class="lead">Attacca learns the full progression from search to interaction with three components. Goal images come from a different world than the demonstration, a mask head grounds the target in the current view, and a phase head tells the policy whether to search, approach or interact.</p>
+      </div>
+      <figure class="figure is-framed">
+        <img src="static/images/paper/architecture.png" width="2000" height="849" loading="lazy" decoding="async" alt="Policy architecture. A goal-fusion block combines the masked goal image with the current observation. A mask head predicts the target mask, a residual encoder feeds it to the causal Transformer, and a phase head modulates the readout before the action head.">
+        <figcaption><b>Policy architecture.</b> The masked goal image and the current view are fused, a mask head predicts where the target is, and a phase head conditions the action head.</figcaption>
+      </figure>
+      <ol class="cards">
+        <li class="card">
+          <span class="card-tag">1</span>
+          <h3>Goals from another world</h3>
+          <p>Each demonstration is paired with a masked goal image of the same target class taken in a different world. The goal shares the target but not the scene or the viewpoint, so the policy is pushed to recognize the target by its appearance rather than by the surrounding scene.</p>
+        </li>
+        <li class="card">
+          <span class="card-tag">2</span>
+          <h3>Where is the target now</h3>
+          <p>A mask head predicts where the target is visible in the current view on a 14&times;14 patch grid, and an empty mask while it is out of view. A residual encoder adds this prediction to the readout, so actions can depend on where the target is and whether it is in view.</p>
+        </li>
+        <li class="card">
+          <span class="card-tag">3</span>
+          <h3>Search, approach, interact</h3>
+          <p>A phase head predicts which of the three phases the agent is in, and the prediction modulates the readout through FiLM before the action head. The policy can then change how it moves as it goes from finding the target to acting on it.</p>
+        </li>
+      </ol>
+      <p class="media-note">Target masks and phase labels are used only as training targets. The policy acts on its own predictions and never receives target coordinates or an external detector.</p>
+      <figure class="figure is-mid" style="margin-top: 44px;">
+        <img src="static/images/paper/sampling.jpg" width="1600" height="521" loading="lazy" decoding="async" alt="Two ways of choosing a goal image for the same training trajectory. In (a) it comes from the same world as the trajectory. In (b) it shows the same target class in a different world.">
+        <figcaption><b>Goal sampling.</b> (a) The conventional method takes the goal image from the same world as the training trajectory.<br>(b) Attacca takes a goal image of the same target class from a different world.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============================================================ RESULTS -->
+  <section class="section is-alt" id="results">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Results</p>
+        <h2>Clear gains on short tasks and long chains</h2>
+        <p class="lead">We compare against policies that take text, video, current-view or image goals, on short tasks with held-out target classes and on long chains in one continuous world.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="stat-num">39.0&ndash;47.5%</span><span class="stat-label">clean success on Mine, Hunt and Place</span></div>
+        <div class="stat"><span class="stat-num">1.7&ndash;2.4&times;</span><span class="stat-label">the strongest baseline on short tasks</span></div>
+        <div class="stat"><span class="stat-num">54 / 30 / 28%</span><span class="stat-label">of the three long chains completed</span></div>
+        <div class="stat"><span class="stat-num">up to 7&times;</span><span class="stat-label">the strongest baseline on long chains</span></div>
+      </div>
+
+      <div class="sub">
+        <div class="sub-head">
+          <h3>Long chains in one continuous world</h3>
+          <p>Three chains of three to five stages. Every stage starts where the previous one ended, and only the goal image changes. No method is trained on these chains.</p>
+        </div>
+        <div class="lh-wrap">
+          <div class="seg">
+            <ul role="tablist" aria-label="Long-horizon chains" data-lh-tabs>
+              <li class="is-active"><a href="#lh-dpx" role="tab" id="tab-dpx" aria-controls="lh-dpx" aria-selected="true" tabindex="0">Diamond Pickaxe</a></li>
+              <li><a href="#lh-ccfw" role="tab" id="tab-ccfw" aria-controls="lh-ccfw" aria-selected="false" tabindex="-1">Wolf Feeding</a></li>
+              <li><a href="#lh-wlo" role="tab" id="tab-wlo" aria-controls="lh-wlo" aria-selected="false" tabindex="-1">Nether Portal</a></li>
+            </ul>
+          </div>
+          <div class="stage-carousel" id="lh-dpx" role="tabpanel" aria-labelledby="tab-dpx" aria-roledescription="carousel" data-chain="dpx" data-advance="cut" data-rate="0.7">
+            <div class="sc-viewport">
+              <div class="sc-track">
+              <figure class="sc-slide is-active" role="group" aria-roledescription="slide" aria-label="Stage 1 of 3: Mine oak log">
+                <video class="sc-video" src="static/videos/long/dpx/01_oak_log_mine.mp4" poster="static/videos/long/dpx/01_oak_log_mine_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 2 of 3: Mine 3 diamond ores" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/dpx/02_diamond_ore_mine3.mp4" poster="static/videos/long/dpx/02_diamond_ore_mine3_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 3 of 3: Open crafting table" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/dpx/03_crafting_table_open.mp4" poster="static/videos/long/dpx/03_crafting_table_open_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              </div>
+              <button class="sc-arrow sc-prev" type="button" aria-label="Previous stage" title="Previous stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="sc-arrow sc-next" type="button" aria-label="Next stage" title="Next stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="sc-playpause" type="button" aria-label="Pause" title="Pause"><svg class="sc-icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg><svg class="sc-icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg></button>
+            </div>
+            <ol class="sc-stepper" aria-label="Stages">
+              <li><button class="sc-step" type="button" data-index="0" data-title="Mine oak log" data-note="" aria-label="Stage 1 of 3: Mine oak log" aria-current="step">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/dpx/goals/01_oak_log_mine_goal.png" alt="Goal image for stage 1: an oak log, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">1</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Mine oak log</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="1" data-title="Mine 3 diamond ores" data-note="" aria-label="Stage 2 of 3: Mine 3 diamond ores">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/dpx/goals/02_diamond_ore_mine3_goal.png" alt="Goal image for stage 2: diamond ore, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">2</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Mine 3 diamond ores</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="2" data-title="Open crafting table" data-note="" aria-label="Stage 3 of 3: Open crafting table">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/dpx/goals/03_crafting_table_open_goal.png" alt="Goal image for stage 3: a crafting table, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">3</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Open crafting table</span>
+              </button></li>
+            </ol>
+          </div>
+          <div class="stage-carousel" id="lh-ccfw" role="tabpanel" aria-labelledby="tab-ccfw" aria-roledescription="carousel" data-chain="ccfw" data-advance="cut" data-rate="0.7" hidden>
+            <div class="sc-viewport">
+              <div class="sc-track">
+              <figure class="sc-slide is-active" role="group" aria-roledescription="slide" aria-label="Stage 1 of 4: Mine coal">
+                <video class="sc-video" src="static/videos/long/ccfw/01_coal_ore_mine.mp4" poster="static/videos/long/ccfw/01_coal_ore_mine_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 2 of 4: Hunt cow" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/ccfw/02_cow_hunt.mp4" poster="static/videos/long/ccfw/02_cow_hunt_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 3 of 4: Open furnace" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/ccfw/03_furnace_find.mp4" poster="static/videos/long/ccfw/03_furnace_find_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 4 of 4: Feed wolf" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/ccfw/04_wolf_feed.mp4" poster="static/videos/long/ccfw/04_wolf_feed_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              </div>
+              <button class="sc-arrow sc-prev" type="button" aria-label="Previous stage" title="Previous stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="sc-arrow sc-next" type="button" aria-label="Next stage" title="Next stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="sc-playpause" type="button" aria-label="Pause" title="Pause"><svg class="sc-icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg><svg class="sc-icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg></button>
+            </div>
+            <ol class="sc-stepper" aria-label="Stages">
+              <li><button class="sc-step" type="button" data-index="0" data-title="Mine coal" data-note="" aria-label="Stage 1 of 4: Mine coal" aria-current="step">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/ccfw/goals/01_coal_ore_mine_goal.png" alt="Goal image for stage 1: coal ore, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">1</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Mine coal</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="1" data-title="Hunt cow" data-note="" aria-label="Stage 2 of 4: Hunt cow">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/ccfw/goals/02_cow_hunt_goal.png" alt="Goal image for stage 2: a cow, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">2</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Hunt cow</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="2" data-title="Open furnace" data-note="" aria-label="Stage 3 of 4: Open furnace">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/ccfw/goals/03_furnace_find_goal.png" alt="Goal image for stage 3: a furnace, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">3</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Open furnace</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="3" data-title="Feed wolf" data-note="" aria-label="Stage 4 of 4: Feed wolf">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/ccfw/goals/04_wolf_feed_goal.png" alt="Goal image for stage 4: a wolf, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">4</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Feed wolf</span>
+              </button></li>
+            </ol>
+          </div>
+          <div class="stage-carousel" id="lh-wlo" role="tabpanel" aria-labelledby="tab-wlo" aria-roledescription="carousel" data-chain="wlo" data-advance="cut" data-rate="0.7" hidden>
+            <div class="sc-viewport">
+              <div class="sc-track">
+              <figure class="sc-slide is-active" role="group" aria-roledescription="slide" aria-label="Stage 1 of 6: Scoop water">
+                <video class="sc-video" src="static/videos/long/wlo/01_scoop.mp4" poster="static/videos/long/wlo/01_scoop_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 2 of 6: Pour water on lava" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/wlo/02_pour.mp4" poster="static/videos/long/wlo/02_pour_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 3 of 6: Mine obsidian" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/wlo/03_mine.mp4" poster="static/videos/long/wlo/03_mine_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 4 of 6: Find portal frame" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/wlo/04_portal_find.mp4" poster="static/videos/long/wlo/04_portal_find_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 5 of 6: Fill portal gap" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/wlo/05_portal_fix.mp4" poster="static/videos/long/wlo/05_portal_fix_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              <figure class="sc-slide" role="group" aria-roledescription="slide" aria-label="Stage 6 of 6: Light portal" aria-hidden="true">
+                <video class="sc-video" src="static/videos/long/wlo/06_ignite.mp4" poster="static/videos/long/wlo/06_ignite_poster.jpg" width="1280" height="720" muted playsinline preload="none" controls></video>
+              </figure>
+              </div>
+              <button class="sc-arrow sc-prev" type="button" aria-label="Previous stage" title="Previous stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="sc-arrow sc-next" type="button" aria-label="Next stage" title="Next stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="sc-playpause" type="button" aria-label="Pause" title="Pause"><svg class="sc-icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg><svg class="sc-icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg></button>
+            </div>
+            <ol class="sc-stepper" aria-label="Stages">
+              <li><button class="sc-step" type="button" data-index="0" data-title="Scoop water" data-note="" aria-label="Stage 1 of 6: Scoop water" aria-current="step">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/wlo/goals/01_scoop_goal.png" alt="Goal image for stage 1: a water pool, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">1</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Scoop water</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="1" data-title="Pour water on lava" data-note="" aria-label="Stage 2 of 6: Pour water on lava">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/wlo/goals/02_pour_goal.png" alt="Goal image for stage 2: a lava pool, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">2</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Pour water on lava</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="2" data-title="Mine obsidian" data-note="" aria-label="Stage 3 of 6: Mine obsidian">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/wlo/goals/03_mine_goal.png" alt="Goal image for stage 3: an obsidian block, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">3</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Mine obsidian</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="3" data-title="Find portal frame" data-note="" aria-label="Stage 4 of 6: Find portal frame">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/wlo/goals/04_portal_find_goal.png" alt="Goal image for stage 4: a finished obsidian portal frame, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">4</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Find portal frame</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="4" data-title="Fill portal gap" data-note="" aria-label="Stage 5 of 6: Fill portal gap">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/wlo/goals/05_portal_fix_goal.png" alt="Goal image for stage 5: a sea-lantern gap marker, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">5</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Fill portal gap</span>
+              </button></li>
+              <li><button class="sc-step" type="button" data-index="5" data-title="Light portal" data-note="" aria-label="Stage 6 of 6: Light portal">
+                <span class="sc-step-thumb"><img class="sc-step-img" src="static/videos/long/wlo/goals/06_ignite_goal.png" alt="Goal image for stage 6: a netherrack block inside the frame, outlined in yellow" width="320" height="180" loading="lazy" decoding="async"><span class="sc-step-num" aria-hidden="true">6</span></span>
+                <span class="sc-step-bar" aria-hidden="true"><i></i></span>
+                <span class="sc-step-label">Light portal</span>
+              </button></li>
+            </ol>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <p class="table-title">Chain success (%), 50 episodes per chain</p>
+          <table class="rtable">
+              <thead><tr><th>Policy</th><th class="num">Diamond Pickaxe</th><th class="num">Wolf Feeding</th><th class="num">Nether Portal</th></tr></thead>
+              <tbody>
+                <tr class="group"><td colspan="4">Text goal</td></tr>
+                <tr><td>STEVE-1</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr><td>JARVIS-VLA</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr class="group"><td colspan="4">Video goal</td></tr>
+                <tr><td>STEVE-1</td><td class="num">2</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr><td>GROOT</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr class="group"><td colspan="4">Current-view goal (Molmo + SAM 2)</td></tr>
+                <tr><td>ROCKET-1</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr><td>ROCKET-2</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr class="group"><td colspan="4">Goal image from another world</td></tr>
+                <tr><td>ROCKET-2 <span class="dim">(released)</span></td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+                <tr><td>ROCKET-2 <span class="dim">(fine-tuned)</span></td><td class="num">8</td><td class="num">6</td><td class="num">4</td></tr>
+                <tr class="is-ours"><td>Attacca (ours)</td><td class="num">54</td><td class="num">30</td><td class="num">28</td></tr>
+              </tbody>
+            </table>
+        </div>
+        <p class="table-note">A chain counts only if every stage succeeds. Crafting, cooking and item handling are scripted in the same way for every method.</p>
+      </div>
+
+      <div class="sub">
+        <div class="sub-head">
+          <h3>Short tasks with held-out targets</h3>
+          <p>Each episode starts with the target out of view among objects of other classes. Three of the ten target classes per task never appear in training.</p>
+        </div>
+        <div class="table-wrap">
+          <p class="table-title">Clean success (%), average over seen and held-out classes, 200 episodes per task</p>
+          <table class="rtable">
+              <thead><tr><th>Policy</th><th class="num">Mine</th><th class="num">Hunt</th><th class="num">Place</th></tr></thead>
+              <tbody>
+                <tr class="group"><td colspan="4">Text goal</td></tr>
+                <tr><td>STEVE-1</td><td class="num">0.5</td><td class="num">5.5</td><td class="num">0.0</td></tr>
+                <tr><td>JARVIS-VLA</td><td class="num">8.0</td><td class="num">16.5</td><td class="num">8.5</td></tr>
+                <tr class="group"><td colspan="4">Video goal</td></tr>
+                <tr><td>STEVE-1</td><td class="num">2.0</td><td class="num">4.0</td><td class="num">0.0</td></tr>
+                <tr><td>GROOT</td><td class="num">1.0</td><td class="num">4.0</td><td class="num">0.0</td></tr>
+                <tr class="group"><td colspan="4">Current-view goal (Molmo + SAM 2)</td></tr>
+                <tr><td>ROCKET-1</td><td class="num">2.0</td><td class="num">18.0</td><td class="num">4.5</td></tr>
+                <tr><td>ROCKET-2</td><td class="num">5.0</td><td class="num">20.0</td><td class="num">1.5</td></tr>
+                <tr class="group"><td colspan="4">Goal image from another world</td></tr>
+                <tr><td>ROCKET-2 <span class="dim">(released)</span></td><td class="num">0.5</td><td class="num">10.0</td><td class="num">0.0</td></tr>
+                <tr><td>ROCKET-2 <span class="dim">(fine-tuned)</span></td><td class="num">23.5</td><td class="num">18.5</td><td class="num">22.5</td></tr>
+                <tr class="is-ours"><td>Attacca (ours)</td><td class="num">39.0</td><td class="num">47.5</td><td class="num">47.0</td></tr>
+              </tbody>
+            </table>
+        </div>
+        <p class="table-note">An episode counts as a clean success only if it reaches the goal without any wrong-class interaction. All baselines except the released ROCKET-2 checkpoint are trained on our demonstrations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ ANALYSIS -->
+  <section class="section" id="analysis">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Analysis</p>
+        <h2>Seeing the target is not enough</h2>
+        <p class="lead">In the diamond stage of Diamond Pickaxe, the fine-tuned ROCKET-2 sees the diamond ore in 27 of its 28 episodes but finishes only 4 of them. Attacca finishes 39 of 42.</p>
+      </div>
+      <div class="pair-figs">
+        <figure class="figure">
+          <img src="static/images/paper/traj_maps.jpg" width="1600" height="958" loading="lazy" decoding="async" alt="Top-down paths of every episode that reaches the diamond stage. Attacca's paths converge on the diamond ore, while ROCKET-2's paths spread over the arena.">
+          <figcaption><b>(a)</b> Paths of every episode that reaches the diamond stage.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="static/images/paper/traj_raster.png" width="1200" height="657" loading="lazy" decoding="async" alt="Target visibility over time for every episode. For Attacca the diamond ore stays in view until the stage is completed, while for ROCKET-2 it keeps leaving the view.">
+          <figcaption><b>(b)</b> Whether the diamond ore stays in view after it first appears.</figcaption>
+        </figure>
+      </div>
+      <p class="media-note">Once Attacca sees the ore, it keeps it in view and its paths converge on it. ROCKET-2 also finds the ore, but loses it again and wanders until the 600-step budget runs out.</p>
+
+      <div class="cmp-section">
+        <div class="sub-head">
+          <h3>ROCKET-2 copies the goal view</h3>
+          <p>ROCKET-2 is trained with goal images from the same world as its demonstrations. Reproducing the goal view works when the goal image was taken right next to the target, and fails otherwise.</p>
+        </div>
+        <div class="table-wrap" style="max-width: 640px;">
+          <p class="table-title">Success (%) by goal image, diamond and oak scenarios, 100 episodes per cell</p>
+          <table class="rtable">
+            <thead><tr><th>Policy</th><th class="num">Same world, close</th><th class="num">Same world, far</th><th class="num">Different world</th></tr></thead>
+            <tbody>
+              <tr><td>ROCKET-2 <span class="dim">(fine-tuned)</span></td><td class="num">75</td><td class="num">24</td><td class="num">30</td></tr>
+              <tr class="is-ours"><td>Attacca (ours)</td><td class="num">89</td><td class="num">89</td><td class="num">81</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cmp-block" style="margin-top: 44px;">
+          <div class="cmp-block-head">
+            <h3>Current-view goal</h3>
+            <p>Every 30 steps Molmo is asked to point at the target in the current view, and SAM 2 turns the point into a mask. While the target is out of view there is nothing to point at, so ROCKET-2 has no goal to follow.</p>
+          </div>
+          <div class="cmp-row">
+<figure class="cmp-item">
+  <p class="cmp-task">Oak log</p>
+  <div class="cmp-labels is-single"><span class="is-baseline">ROCKET-2 + Molmo</span></div>
+  <div class="cmp-video-wrap">
+    <video id="cmp-molmo-oak" class="cmp-video" muted loop playsinline preload="none" poster="static/videos/compare/molmo_oak_bpe.jpg" width="1280" height="720" aria-label="ROCKET-2 prompted by Molmo on the oak log task: at every query the prompt, Molmo&#x27;s point and its mask are shown, and the top-right inset shows the goal Molmo produced">
+      <source src="static/videos/compare/molmo_oak_bpe.mp4" type="video/mp4">
+    </video>
+    <button class="video-toggle" type="button" data-target="cmp-molmo-oak" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
+    <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</figure>
+<figure class="cmp-item">
+  <p class="cmp-task">Diamond ore</p>
+  <div class="cmp-labels is-single"><span class="is-baseline">ROCKET-2 + Molmo</span></div>
+  <div class="cmp-video-wrap">
+    <video id="cmp-molmo-diamond" class="cmp-video" muted loop playsinline preload="none" poster="static/videos/compare/molmo_diamond_bpe.jpg" width="1280" height="720" aria-label="ROCKET-2 prompted by Molmo on the diamond ore task: at every query the prompt, Molmo&#x27;s point and its mask are shown, and the top-right inset shows the goal Molmo produced">
+      <source src="static/videos/compare/molmo_diamond_bpe.mp4" type="video/mp4">
+    </video>
+    <button class="video-toggle" type="button" data-target="cmp-molmo-diamond" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
+    <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</figure>
+</div>
+        </div>
+        <div class="cmp-block">
+          <div class="cmp-block-head">
+            <h3>Goal image from the execution world</h3>
+            <p>ROCKET-2 (left) tends to reproduce the goal view instead of interacting with the target.<br>Attacca (right) goes to the target and mines it.</p>
+          </div>
+          <div class="cmp-row">
+<figure class="cmp-item">
+  <p class="cmp-task">Diamond ore</p>
+  <div class="cmp-labels"><span class="is-baseline">ROCKET-2</span><span class="is-ours">Ours</span></div>
+  <div class="cmp-video-wrap is-pair">
+    <video id="cmp-pair-sameworld-diamond" class="cmp-video" muted loop playsinline preload="none" poster="static/videos/compare/pair_sameworld_diamond_bpe.jpg" width="2560" height="720" aria-label="Diamond ore, goal image from the same world: ROCKET-2 on the left, Ours on the right, started together">
+      <source src="static/videos/compare/pair_sameworld_diamond_bpe.mp4" type="video/mp4">
+    </video>
+    <button class="video-toggle" type="button" data-target="cmp-pair-sameworld-diamond" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
+    <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</figure>
+<figure class="cmp-item">
+  <p class="cmp-task">Oak log</p>
+  <div class="cmp-labels"><span class="is-baseline">ROCKET-2</span><span class="is-ours">Ours</span></div>
+  <div class="cmp-video-wrap is-pair">
+    <video id="cmp-pair-sameworld-oak" class="cmp-video" muted loop playsinline preload="none" poster="static/videos/compare/pair_sameworld_oak_bpe.jpg" width="2560" height="720" aria-label="Oak log, goal image from the same world: ROCKET-2 on the left, Ours on the right, started together">
+      <source src="static/videos/compare/pair_sameworld_oak_bpe.mp4" type="video/mp4">
+    </video>
+    <button class="video-toggle" type="button" data-target="cmp-pair-sameworld-oak" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
+    <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</figure>
+</div>
+        </div>
+        <div class="cmp-block">
+          <div class="cmp-block-head">
+            <h3>Goal image from a different world</h3>
+            <p>The world the agent acts in is unknown in advance, so this is the setting Attacca is built for.<br>ROCKET-2 does not reach the target, while Attacca finds it and completes the task.</p>
+          </div>
+          <div class="cmp-row">
+<figure class="cmp-item">
+  <p class="cmp-task">Diamond ore</p>
+  <div class="cmp-labels"><span class="is-baseline">ROCKET-2</span><span class="is-ours">Ours</span></div>
+  <div class="cmp-video-wrap is-pair">
+    <video id="cmp-pair-crossworld-diamond" class="cmp-video" muted loop playsinline preload="none" poster="static/videos/compare/pair_crossworld_diamond_bpe.jpg" width="2560" height="720" aria-label="Diamond ore, goal image from a different world: ROCKET-2 on the left, Ours on the right, started together">
+      <source src="static/videos/compare/pair_crossworld_diamond_bpe.mp4" type="video/mp4">
+    </video>
+    <button class="video-toggle" type="button" data-target="cmp-pair-crossworld-diamond" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
+    <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</figure>
+<figure class="cmp-item">
+  <p class="cmp-task">Cow</p>
+  <div class="cmp-labels"><span class="is-baseline">ROCKET-2</span><span class="is-ours">Ours</span></div>
+  <div class="cmp-video-wrap is-pair">
+    <video id="cmp-pair-crossworld-cow" class="cmp-video" muted loop playsinline preload="none" poster="static/videos/compare/pair_crossworld_cow_bpe.jpg" width="2560" height="720" aria-label="Cow, goal image from a different world: ROCKET-2 on the left, Ours on the right, started together">
+      <source src="static/videos/compare/pair_crossworld_cow_bpe.mp4" type="video/mp4">
+    </video>
+    <button class="video-toggle" type="button" data-target="cmp-pair-crossworld-cow" aria-label="Pause" title="Pause">
+    <svg class="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
+    <svg class="icon-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .6.7 1 1.2.7l9-5.8c.5-.3.5-1.1 0-1.4l-9-5.8C4.7 1.2 4 1.6 4 2.2z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</figure>
+</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ ABSTRACT -->
+  <section class="section is-alt" id="abstract">
+    <div class="wrap narrow">
+      <h2>Abstract</h2>
+      <p class="abstract-text" style="margin-top: 18px;">A central capability of embodied agents is to accomplish complex objectives through sequences of interdependent tasks. Yet existing visual goal-conditioned policies underlying these agents are typically evaluated on isolated interactions where the target is already visible, and thus do not capture the conditions that arise during continuous long-horizon task execution. In such settings, each task begins from the state left by the previous one: the agent may end at a different position and orientation, the world may have been modified, and the next interaction target may lie outside the current field of view. As a result, agents relying on such policies may struggle to proceed to the next task when they cannot ground their target in the current observation. To address this challenge, we propose Attacca, a new approach that trains visual goal-conditioned policies on complete exploration-to-interaction trajectories using goal images decoupled from the execution environment. Attacca uses context-decoupled goal sampling to pair each demonstration with a class-compatible masked goal image from another world, removing direct scene and pose correspondence. It learns dense current-view grounding through a target-mask prediction head, providing auxiliary supervision beyond action imitation. We further introduce behavioral-phase conditioning that teaches the policy to distinguish Search, Approach, and Interact stages and adapt its control as execution progresses. We evaluate Attacca on multiple short- and long-horizon embodied tasks in Minecraft. Our method achieves 39.0&ndash;47.5% clean success, improving over the strongest baseline by 1.7&ndash;2.4&times;. On long-horizon tasks, it attains 54%, 30%, and 28% completion, yielding up to a 7&times; improvement.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ BIBTEX -->
+  <section class="section" id="bibtex">
+    <div class="wrap narrow">
+      <h2>BibTeX</h2>
+      <div class="bibtex">
+        <button class="copy-btn" type="button" data-target="bibtex-code">Copy</button>
+        <pre><code id="bibtex-code">@article{seo2026attacca,
+  title   = {Attacca: Goal-Directed Control under State Continuity for Long-Horizon Embodied Agents},
+  author  = {Seo, Gyusik and Yoon, Jaehong},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">Gyusik Seo and Jaehong Yoon, Nanyang Technological University</div>
+</footer>
+
 </body>
 </html>
