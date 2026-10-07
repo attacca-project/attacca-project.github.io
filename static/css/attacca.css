@@ -90,6 +90,7 @@ b, strong { font-weight: 650; color: var(--ink); }
 .authors, .affils { display: flex; flex-wrap: wrap; justify-content: center; list-style: none; padding: 0; }
 .authors { gap: 6px 28px; margin-top: 30px; font-size: 18px; font-weight: 550; }
 .authors sup, .affils sup { font-size: 0.62em; margin-left: 1px; color: var(--muted); }
+.authors a { color: inherit; }
 .affils { gap: 6px 22px; margin-top: 8px; font-size: 15.5px; color: var(--muted); }
 .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 28px; }
 .btn {
